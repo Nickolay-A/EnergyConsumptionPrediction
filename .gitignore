@@ -1,0 +1,8 @@
+*.xlsx
+*.csv
+*.pickle
+*.bat
+
+__pycache__
+*/.vscode/*
+*/.envs
