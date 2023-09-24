@@ -4,5 +4,6 @@
 *.bat
 
 __pycache__
+research
 */.vscode/*
 */.envs
