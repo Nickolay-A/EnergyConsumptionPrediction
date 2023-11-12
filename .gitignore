@@ -1,9 +1,10 @@
 *.xlsx
 *.csv
 *.pickle
+*.h5
 *.bat
 
+envs
 __pycache__
 research
 */.vscode/*
-*/.envs
