@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from energy_consumption.config import path_to_base
+from config import path_to_base
 
 
 def write_to_db(data: pd.DataFrame, date: datetime) -> None:

@@ -5,7 +5,7 @@ import sqlite3
 
 import pandas as pd
 
-from energy_consumption.config import path_to_base
+from config import path_to_base
 
 
 if __name__ == '__main__':

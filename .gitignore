@@ -3,8 +3,12 @@
 *.pickle
 *.h5
 *.bat
+*.sqlite
+*.ipynb
 
 envs
+monitor_reports
+reports
 __pycache__
 research
 */.vscode/*

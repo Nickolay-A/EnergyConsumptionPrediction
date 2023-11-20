@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 import pandas as pd
 
-from energy_consumption.config import path_to_base
+from config import path_to_base
 
 
 def call_predictors(date: datetime,

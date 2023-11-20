@@ -8,7 +8,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from energy_consumption.config import path_to_base
+from config import path_to_base
 
 
 def check_base(date: datetime) -> Optional[pd.DataFrame]:
@@ -84,7 +84,8 @@ if __name__ == '__main__':
     cursor_.execute(query_)
     conn_.commit()
     # вызовем тестируемую функцию
-    check_base(date=datetime.strptime('2022-12', '%Y-%m'))
+    check = check_base(date=datetime.strptime('2022-12', '%Y-%m'))
+    print(check)
     # вернем данные на место
     query_ = """
         INSERT INTO
@@ -102,6 +103,7 @@ if __name__ == '__main__':
     cursor_.execute("""DROP TABLE IF EXISTS temp_table;""")
     conn_.commit()
     # еще раз вызовем тестируемую функцию
-    check_base(date=datetime.strptime('2022-12', '%Y-%m'))
+    check = check_base(date=datetime.strptime('2022-12', '%Y-%m'))
+    print(check)
 
     conn_.close()

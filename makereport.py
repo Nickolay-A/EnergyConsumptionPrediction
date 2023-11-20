@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from energy_consumption.config import path_to_reports
+from config import path_to_reports
 
 
 def make_report(data: pd.DataFrame, date: datetime) -> None:
@@ -19,7 +19,7 @@ def make_report(data: pd.DataFrame, date: datetime) -> None:
     dates = [date + timedelta(hours=i) for i in range(24)]
     data['power_pred'] = data.mean(axis=1)
     data.drop(data.columns[:-1], axis=1, inplace=True)
-    data.index= dates
+    data.index = dates
     data.to_excel(f'{path_to_reports}/Прогноз потребления электроэнергии на {date.date()}.xlsx')
 
     _, ax = plt.subplots(figsize=(6, 6))

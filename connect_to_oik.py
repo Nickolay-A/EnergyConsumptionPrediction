@@ -8,6 +8,8 @@ from typing import Tuple, Optional
 import pandas as pd
 import win32com.client as win32
 
+from config import path_to_reports
+
 
 class MyCastomException(Exception):
     """
@@ -49,11 +51,13 @@ def load_data_from_oik(begin_time : datetime,
     assert len(ti_alias) == len(ti_name), 'Укажите верный перечень ТИ и их наименований'
     # открытие книги эксель с вложенным макросом
     excel = win32.gencache.EnsureDispatch('Excel.Application')
-    workbook = excel.Workbooks.Open(os.getcwd() + r'./connection/load_data.xlsm')
+    workbook = excel.Workbooks.Open(os.path.join(os.getcwd(),
+                                                 'connection/load_data.xlsm')
+    )
     excel.Visible = False
 
     worksheet = workbook.ActiveSheet
-    # заполнение исзодных данных для работы макроса
+    # заполнение исходных данных для работы макроса
     worksheet.Range('B2').Value = str(begin_time).replace('-', '.')
     worksheet.Range('B3').Value = str(end_time).replace('-', '.')
     worksheet.Range('B4').Value = resolution
@@ -85,13 +89,42 @@ def load_data_from_oik(begin_time : datetime,
 
     return data
 
+def load_data_to_oik(date: datetime) -> None:
+    """
+    Функция для вызова .xlsm файла со скриптом. Обращается к ОИК и записывает в БД
+    значения прогноза электрической энергии 
+    """
+    # открытие книги эксель с вложенным макросом
+    excel = win32.gencache.EnsureDispatch('Excel.Application')
+    workbook = excel.Workbooks.Open(
+        os.path.join(
+            os.getcwd(),
+            'connection/update_data.xlsm'
+        )
+    )
+    excel.Visible = False
+    worksheet = workbook.ActiveSheet
 
-if __name__ == '__main__':
-    import tempfile
+    # заполнение исходных данных для работы макроса
+    file_with_results = os.path.join(
+        path_to_reports,
+        f'Прогноз потребления электроэнергии на {date.date()}.xlsx'
+    )
+    worksheet.Range('B2').Value = str(date).replace('-', '.')
+    worksheet \
+        .Range('B3') \
+        .Value = file_with_results
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        print(load_data_from_oik(begin_time=datetime.strptime('2023-06-01 01:00:00',
-                                                              '%Y-%m-%d %H:%M:%S'),
-                                 end_time=datetime.strptime('2023-07-01 00:00:00',
-                                                            '%Y-%m-%d %H:%M:%S'),
-                                 file_name=temp_dir+r'\data_from_oik'))
+    # вызов макроса
+    try:
+        excel.Application.Run('Лист1.main')
+        print('Прогнозные значения записаны в ОИК')
+    except MyCastomException as error:
+        print(f'Ошибка {str(error)} при выполнении макроса')
+        return None
+
+    # закрываем книгу с макросом
+    workbook.Close(SaveChanges=False)
+    excel.Quit()
+
+    return None

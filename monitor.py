@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from dateutil.relativedelta import relativedelta
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
-from energy_consumption.config import path_to_base, path_to_monitor_reports
+from config import path_to_base, path_to_monitor_reports
 
 
 def check_the_quality(check_date: datetime) -> None:
@@ -168,4 +168,4 @@ def check_the_quality(check_date: datetime) -> None:
 
 
 if __name__ == '__main__':
-    check_the_quality(check_date = datetime.strptime('2023-05', '%Y-%m'))
+    check_the_quality(check_date = datetime.strptime('2023-10', '%Y-%m'))

@@ -7,6 +7,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
+from config import path_to_monitor_reports
 from accesstobase import check_base
 from predict import call_predictors
 from predictors.lgbm.predictor_lgbm import lgbm_model
@@ -14,7 +15,7 @@ from predictors.rnn.predictor_rnn import rnn_model
 from writetodb import write_to_db
 from makereport import make_report
 from monitor import check_the_quality
-from energy_consumption.config import path_to_monitor_reports
+from connect_to_oik import load_data_to_oik
 
 
 parser = argparse.ArgumentParser()
@@ -37,7 +38,7 @@ if __name__ == '__main__':
         print(f'Мониторинг за {date.strftime("%Y-%m")} выполнялся ранее')
 
     else:
-        
+
         dates = check_base(date=date)
 
         if dates is None:
@@ -46,8 +47,8 @@ if __name__ == '__main__':
             for date_ in dates['dates']:
 
                 pred = call_predictors(date=date_,
-                                    predictors=[(lgbm_model, 'lgbm'),
-                                                (rnn_model, 'rnn')])
+                                       predictors=[(lgbm_model, 'lgbm'),
+                                                   (rnn_model, 'rnn')])
 
                 if pred is None:
                     print(f'Прогноз на {str(date_)} сделать невозможно...')
@@ -55,6 +56,7 @@ if __name__ == '__main__':
                     write_to_db(data=pred.copy(), date=date_)
                     make_report(data=pred.copy(), date=date_)
                     print(f'Прогноз на {str(date_)} выполнен, результаты сохранены')
+                    load_data_to_oik(date=date_)
 
         check_the_quality(check_date=date)
 

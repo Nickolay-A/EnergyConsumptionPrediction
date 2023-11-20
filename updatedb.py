@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from energy_consumption.config import path_to_base
-from connection.connect_to_oik import load_data_from_oik
+from config import path_to_base
+from connect_to_oik import load_data_from_oik
 from preprocessing.timeseriesoutlier import catch_time_series_outs
 
 

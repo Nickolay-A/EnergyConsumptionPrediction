@@ -11,6 +11,7 @@ from predictors.lgbm.predictor_lgbm import lgbm_model
 from predictors.rnn.predictor_rnn import rnn_model
 from writetodb import write_to_db
 from makereport import make_report
+from connect_to_oik import load_data_to_oik
 
 
 parser = argparse.ArgumentParser()
@@ -36,4 +37,5 @@ if __name__ == '__main__':
     else:
         write_to_db(data=pred.copy(), date=date)
         make_report(data=pred.copy(), date=date)
+        load_data_to_oik(date=date)
         print(f'Прогноз на {str(date)} выполнен, результаты сохранены')
