@@ -8,3 +8,6 @@ lightgbm        == 3.3.5
 openpyxl        == 3.0.10
 joblib          == 1.2.0
 pywin32         == 304
+tqdm            == 4.66.1
+onnx            == 1.14.0
+onnxruntime     == 1.16.3

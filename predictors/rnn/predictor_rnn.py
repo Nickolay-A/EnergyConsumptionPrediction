@@ -10,7 +10,7 @@ from typing import List
 
 import pandas as pd
 import numpy as np
-from keras.models import load_model
+import onnxruntime as ort
 from dateutil.relativedelta import relativedelta
 
 
@@ -42,9 +42,9 @@ def rnn_model(data: pd.DataFrame,
         Доступны: {'hour', 'day_of_year', 'month', 'weekday'}
         """
         time_dict = {'hour'        : 24,
-                    'day_of_year' : 365.25,
-                    'month'       : 12,
-                    'weekday'     : 7}
+                     'day_of_year' : 365.25,
+                     'month'       : 12,
+                     'weekday'     : 7}
         df.set_index('datetime', inplace=True)
 
         # следующеие фичи нужны для рекуррентного входа
@@ -158,7 +158,8 @@ def rnn_model(data: pd.DataFrame,
     Dense_input = pd.DataFrame(X.loc[date, Dense_input_cols]).astype(float).T
 
     # загрузим модель и скеллеры для обработки данных
-    model = load_model('./predictors/rnn/model.h5')
+    session = ort.InferenceSession('./predictors/rnn/model.onnx')
+    
     with open('./predictors/rnn/scallers.pickle', 'rb') as file:
         scaller_RNN, scaller_Dense = pickle.load(file)
 
@@ -176,6 +177,10 @@ def rnn_model(data: pd.DataFrame,
     Input = [RNN_input, Dense_input]
 
     # вызовем predict у модели
-    pred = model.predict(Input)
+    inputDetails = session.get_inputs()
+    pred = session.run(None, {
+        inputDetails[0].name: Input[0].astype(np.float32),
+        inputDetails[1].name: Input[1].astype(np.float32),
+    })
 
     return np.array(pred).reshape(1, -1)
