@@ -14,7 +14,7 @@ from config import path_to_base
 
 
 def call_predictors(date: datetime,
-                    predictors: List[Tuple[Callable, str]],
+                    predictors: List[Tuple[Callable, str, str]],
                     ) -> Optional[pd.DataFrame]:
     """
     функция обращется к БД и в случае, если в БД имеются исходные данные для предсказания,
@@ -109,8 +109,10 @@ def call_predictors(date: datetime,
 
     predicts = pd.DataFrame()
     # просуммируем значения, пришедшие от моделей
-    for (predictor_obj, predictor_name) in predictors:
-        predicts[predictor_name] = predictor_obj(data=data.copy(), date=predict_time)[0]
+    for (predictor_obj, predictor_name, predictor_path) in predictors:
+        predicts[predictor_name] = predictor_obj(data=data.copy(),
+                                                 date=predict_time,
+                                                 model_path=predictor_path)[0]
 
     return predicts
 
@@ -121,5 +123,8 @@ if __name__ == '__main__':
 
 
     print(call_predictors(date=datetime.strptime('2023-05-01', '%Y-%m-%d'),
-                          predictors=[(lgbm_model, 'lgbm'),
-                                      (rnn_model, 'rnn')]))
+                          predictors=[
+                            (lgbm_model, 'lgbm', r'predictors\lgbm\models\model_v0'),
+                            (rnn_model, 'rnn', r'predictors\rnn\models\model_v0'),
+                            (rnn_model, 'rnn_v1', r'predictors\rnn\models\model_v1_2023-12-15'),
+                        ]))

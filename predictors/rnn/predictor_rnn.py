@@ -4,6 +4,7 @@
 """
 import warnings
 import re
+import os
 import pickle
 from datetime import datetime, timedelta
 from typing import List
@@ -15,12 +16,14 @@ from dateutil.relativedelta import relativedelta
 
 
 def rnn_model(data: pd.DataFrame,
-              date: datetime) -> np.array:
+              date: datetime,
+              model_path: str) -> np.array:
     """
     Функция делает предсказание потребления элетроэнергии на предстоящие сутки вперед
     На вход необходимо передать датафрейм с данными за год
-    и момент времени, из которого делается предикт
+    момент времени, из которого делается предикт
     11:00 соответствует полудню... Вот такие пироги...
+    путь к акутальной версии модели
     """
     def make_data(df       : pd.DataFrame,
                   y_lags   : List[int],
@@ -158,9 +161,9 @@ def rnn_model(data: pd.DataFrame,
     Dense_input = pd.DataFrame(X.loc[date, Dense_input_cols]).astype(float).T
 
     # загрузим модель и скеллеры для обработки данных
-    session = ort.InferenceSession('./predictors/rnn/model.onnx')
-    
-    with open('./predictors/rnn/scallers.pickle', 'rb') as file:
+    session = ort.InferenceSession(os.path.join(os.getcwd(), model_path, 'model.onnx'))
+
+    with open(os.path.join(os.getcwd(), model_path, 'scallers.pickle'), 'rb') as file:
         scaller_RNN, scaller_Dense = pickle.load(file)
 
     # проскаллируем данные

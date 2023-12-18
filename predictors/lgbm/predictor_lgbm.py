@@ -5,6 +5,7 @@
 import warnings
 import re
 import pickle
+import os
 from datetime import datetime
 from typing import List
 
@@ -14,12 +15,14 @@ from dateutil.relativedelta import relativedelta
 
 
 def lgbm_model(data: pd.DataFrame,
-               date: datetime) -> np.array:
+               date: datetime,
+               model_path: str) -> np.array:
     """
     Функция делает предсказание потребления элетроэнергии на предстоящие сутки вперед
     На вход необходимо передать датафрейм с данными за год
-    и момент времени, из которого делается предикт
+    момент времени, из которого делается предикт
     11:00 соответствует полудню... Вот такие пироги...
+    путь к акутальной версии модели
     """
     def make_data(df       : pd.DataFrame,
                   lags     : List[int],
@@ -42,9 +45,9 @@ def lgbm_model(data: pd.DataFrame,
         Доступны: {'hour', 'day_of_year', 'month', 'weekday'}
         """
         time_dict = {'hour'        : 24,
-                    'day_of_year' : 365.25,
-                    'month'       : 12,
-                    'weekday'     : 7}
+                     'day_of_year' : 365.25,
+                     'month'       : 12,
+                     'weekday'     : 7}
         df.set_index('datetime', inplace=True)
 
         # извлечем тригонометрическую фичу из времени
@@ -158,7 +161,7 @@ def lgbm_model(data: pd.DataFrame,
 
     # последовательно вызовем все модели и передадим им
     # для предсказания соответсвущие части вектора X
-    with open('./predictors/lgbm/lgbm_model.pickle', 'rb') as file:
+    with open(os.path.join(os.getcwd(), model_path, 'model.pickle'), 'rb') as file:
         model = pickle.load(file)
 
     for lag in y_lags:
