@@ -47,8 +47,11 @@ if __name__ == '__main__':
             for date_ in dates['dates']:
 
                 pred = call_predictors(date=date_,
-                                       predictors=[(lgbm_model, 'lgbm'),
-                                                   (rnn_model, 'rnn')])
+                                       predictors=[
+                    # (lgbm_model, 'lgbm'),
+                    # (rnn_model, 'rnn'),
+                    (rnn_model, 'rnn_v1', r'predictors\rnn\models\model_v1_2023-12-15'),
+                ])
 
                 if pred is None:
                     print(f'Прогноз на {str(date_)} сделать невозможно...')

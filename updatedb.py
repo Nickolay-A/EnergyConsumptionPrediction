@@ -136,6 +136,73 @@ def update_db_by_data_from_oik() -> None:
     conn.close()
     return None
 
+def update_calendar_in_db() -> None:
+    """
+    функция проверяет файл data/calendar.xlsx и базу данных.
+    Если в календаре имеются сведения о рабочих/выходных днях на предстоящий год
+    и их нет в базе данных, то они будут добавлены в БД
+    """
+    # прочитаем календарь из эксель-файла
+    df = pd.read_excel('data/calendar.xlsx')
+    df['day'] = pd.to_datetime(df['day'], format='%Y-%m-%d %H:%M:%s')
+    last_date_in_calendar = df['day'].max()
+
+    # определим последнюю дату, имеющуюся в БД
+    conn = sqlite3.connect(path_to_base)
+    cursor = conn.cursor()
+
+    query = """
+            SELECT
+                t1.datetime AS dates
+            FROM
+                day_off_table AS t1
+            ORDER
+                BY dates DESC
+            LIMIT 1;
+        """
+
+    cursor.execute(query)
+    last_date_in_base = datetime.strptime(cursor.fetchone()[0], '%Y-%m-%d %H:%M:%S')
+
+    if last_date_in_calendar > last_date_in_base:
+        df = df[df['day'] > last_date_in_base]
+        query = """
+            INSERT INTO
+                consumption_table (power_true, temperature, datetime)
+            VALUES
+                (?, ?, ?)
+        """
+        cursor.executemany(query, [
+            (None, None, hour.to_pydatetime())
+            for hour
+            in pd.date_range(
+                start=df['day'].min(),
+                end=df['day'].max() + timedelta(hours=23),
+                freq='H'
+            )
+        ])
+
+        df = df[df['day'] > last_date_in_base]
+        df.rename(columns={'day': 'datetime'}, inplace=True)
+        df.to_sql('temp_table', conn, if_exists='replace', index=False)
+
+        query = """
+        INSERT INTO day_off_table (day_off, datetime)
+        SELECT day_off, datetime FROM temp_table;
+        """
+        conn.execute(query)
+
+        cursor.execute("""DROP TABLE IF EXISTS temp_table;""")
+
+        conn.commit()
+        conn.close()
+
+        print('Данные по выходным/рабочим дням были успешно добавлены в БД')
+    else:
+        print('Дополнительные данные по выходным/рабочим дням не были обнаружены')
+    return None
+
 
 if __name__ == '__main__':
     update_db_by_data_from_oik()
+    update_calendar_in_db()

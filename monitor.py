@@ -97,8 +97,10 @@ def check_the_quality(check_date: datetime) -> None:
             file.write(f'За период {check_date_str} в БД {len(df)} записей за {len(df)//24} суток')
             file.write('\n')
             for model in unique_models:
-                mae = mean_absolute_error(df['power_true'], df[model]).round(1)
-                mape = mean_absolute_percentage_error(df['power_true'], df[model]) * 100
+                tmp_df = pd.DataFrame(data={'power_true': df['power_true'],
+                                            'power_pred': df[model]}).dropna()
+                mae = mean_absolute_error(tmp_df['power_true'], tmp_df['power_pred']).round(1)
+                mape = mean_absolute_percentage_error(tmp_df['power_true'], tmp_df['power_pred']) * 100
                 mape = mape.round(1)
                 file.write(f'Средняя ошибка модели {model} составляет {mae} ({mape}) МВт (%)\n')
 
